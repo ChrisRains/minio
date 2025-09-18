@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: minio-namespace 
+  labels:
+    name: minio-namespace 
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dremio-deployment
+  namespace: minio-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dremio-app
+  template:
+    metadata:
+      labels:
+        app: dremio-app
+        group: minio
+      namespace: minio-namespace    
+    spec:
+      containers:
+      - name: dremio-container
+        #image: dremio/dremio-oss:latest
+        image: dremio/dremio-oss:26.0.0
+        ports:
+        - containerPort: 9047
+        - containerPort: 31010
+        - containerPort: 45678
+        - containerPort: 32010
+        env:
+        - name: DREMIO_JAVA_SERVER_EXTRA_OPTS
+          value: -Dpaths.dist=file:///opt/dremio/data/dist      
+        
+        volumeMounts:
+        - mountPath: "/opt/dremio/data"
+          name: vol-data-dremio-data
+        - mountPath: "/var/lib/dremio"
+          name: vol-data-dremio-lib
+        - mountPath: "/localFiles"
+          name: vol-data-dremio-local
+        resources:
+          limits:
+            cpu: "2" 
+            memory: "2048Mi"  
+          requests:
+            cpu: "0.2"  
+            memory: "256Mi"
+      volumes:
+      - name: vol-data-dremio-local
+        persistentVolumeClaim:
+          claimName: pvc-data-dremio-local
+      - name: vol-data-dremio-lib
+        persistentVolumeClaim:
+          claimName: pvc-data-dremio-lib
+      - name: vol-data-dremio-data
+        persistentVolumeClaim:
+          claimName: pvc-data-dremio-data
+
+      #- "9047:9047"   # Web UI (HTTP)
+      #- "31010:31010" # ODBC/JDBC clients
+      #- "32010:32010" # Apache Arrow Flight clients            

@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nessie-deployment
+  namespace: minio-namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nessie-app
+  template:
+    metadata:   
+      labels:
+        app: nessie-app
+        group: minio
+      namespace: minio-namespace    
+    spec:
+      containers:
+      - name: nessie-container
+        image: projectnessie/nessie:latest
+        ports:
+        - containerPort: 19120
+        env:
+        - name: QUARKUS_PROFILE
+          value: prod
+        - name: QUARKUS_HTTP_PORT
+          value: "19120"
+        - name: QUARKUS_LOG_CONSOLE_FORMAT
+          value: "%d{yyyy-MM-dd HH:mm:ss} %-5p [%c{1.}] (%t) %s%e%n"
+        - name: QUARKUS_LOG_LEVEL
+          value: INFO        
+        volumeMounts:
+        - mountPath: "/nessie/data"
+          name: vol-data-nessie
+        resources:
+          limits:
+            cpu: "2" 
+            memory: "2048Mi"  
+          requests:
+            cpu: "0.2"  
+            memory: "256Mi"
+      volumes:
+      - name: vol-data-nessie
+        persistentVolumeClaim:
+          claimName: pvc-data-nessie
+     
