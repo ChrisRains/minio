@@ -8,6 +8,8 @@ kubectl apply -f nessie-pv.yaml
 
 and then create the container: 
 kubectl apply -f nessie-deployment.yaml
+
+
 <br>[nessie-depl.yaml](deployments/nessie-depl.yaml)
 
 so the container is now creating, using port 19120 for communication. 

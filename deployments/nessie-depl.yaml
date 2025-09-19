@@ -9,11 +9,11 @@ spec:
     matchLabels:
       app: nessie-app
   template:
-    metadata:   
+    metadata:
       labels:
         app: nessie-app
         group: minio
-      namespace: minio-namespace    
+      namespace: minio-namespace
     spec:
       containers:
       - name: nessie-container
@@ -28,7 +28,28 @@ spec:
         - name: QUARKUS_LOG_CONSOLE_FORMAT
           value: "%d{yyyy-MM-dd HH:mm:ss} %-5p [%c{1.}] (%t) %s%e%n"
         - name: QUARKUS_LOG_LEVEL
-          value: INFO        
+          value: INFO
+        - name: nessie.version.store.type
+          value: JDBC
+        - name: quarkus.datasource.jdbc.url
+          value: "jdbc:postgresql://host.docker.internal:5432/nessie_db"
+        - name: quarkus.datasource.username
+          value: nessie_admin
+        - name: quarkus.datasource.password
+          value: nessie_password
+# JDBC2 setup not yet working for me
+#        - name: nessie.version.store.type
+#          value: JDBC2
+#        - name: nessie.version.store.persist.jdbc.datasource
+#          value: postgresql
+#        - name: NESSIE_VERSION_STORE_PERSIST_JDBC_DATASOURCE
+#          value: postgresql
+#        - name: quarkus.datasource.postgresql.jdbc.url
+#          value: "jdbc:postgresql://host.docker.internal:5432/nessie_jdbc2"
+#        - name: quarkus.datasource.postgres.username
+#          value: nessie_admin
+#        - name: quarkus.datasource.postgres.password
+#          value: nessie_password
         volumeMounts:
         - mountPath: "/nessie/data"
           name: vol-data-nessie
